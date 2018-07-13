@@ -1,49 +1,47 @@
-#ifndef FusionEKF_H_
-#define FusionEKF_H_
-
-#include "measurement_package.h"
-#include "Eigen/Dense"
+#ifndef FUSIONEKF_H_
+#define FUSIONEKF_H_
+#include "kalman_filter.h"
+#include "tools.h"
 #include <vector>
 #include <string>
 #include <fstream>
-#include "kalman_filter.h"
-#include "tools.h"
-
+#include "measurement_package.h"
 class FusionEKF {
+
 public:
-  /**
-  * Constructor.
-  */
-  FusionEKF();
 
-  /**
-  * Destructor.
-  */
-  virtual ~FusionEKF();
+	// Constructor
+	FusionEKF();
 
-  /**
-  * Run the whole flow of the Kalman Filter from here.
-  */
-  void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+	// Destructor
+	virtual ~FusionEKF();
 
-  /**
-  * Kalman Filter update and prediction math lives in here.
-  */
-  KalmanFilter ekf_;
+	void ProcessMeasurement(const MeasurementPackage &measurement_pack);
+
+	// This class includes a kalman filter object for processing the measurements
+	KalmanFilter ekf_;
+
 
 private:
-  // check whether the tracking toolbox was initialized or not (first measurement)
-  bool is_initialized_;
 
-  // previous timestamp
-  long long previous_timestamp_;
+	bool is_initialized_;
 
-  // tool object used to compute Jacobian and RMSE
-  Tools tools;
-  Eigen::MatrixXd R_laser_;
-  Eigen::MatrixXd R_radar_;
-  Eigen::MatrixXd H_laser_;
-  Eigen::MatrixXd Hj_;
+	long previous_timestamp_;
+
+	// This class includes a tools object for calculating the Jacobian and RMSE
+	Tools tools;
+
+	MatrixXd R_laser_;
+	MatrixXd R_radar_;
+	MatrixXd H_laser_;
+	MatrixXd Hj_;
+
+	// Acceleration noise components
+	float noise_ax = 9;
+	float noise_ay = 9;
+
 };
 
-#endif /* FusionEKF_H_ */
+
+#endif // !FUSIONEKF_H_
+

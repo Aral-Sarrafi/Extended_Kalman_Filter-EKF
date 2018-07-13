@@ -1,47 +1,46 @@
 #include <iostream>
 #include "tools.h"
 
-using Eigen::VectorXd;
-using Eigen::MatrixXd;
-using std::vector;
+/* Constructor Function*/
+Tools::Tools(){}
 
-Tools::Tools() {}
-
+/*Distructor Function*/
 Tools::~Tools() {}
 
-VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
-                              const vector<VectorXd> &ground_truth) {
-  /**
-  TODO:
-    * Calculate the RMSE here.
-  */
-	VectorXd RMSE(estimations[0].size());
-	VectorXd error(estimations[0].size());
+/*RMSE Function*/
+VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,const vector<VectorXd> &ground_turth) {
 
-	for (int i = 0; i < estimations.size(); i++) {
+	VectorXd rmse(4);
+	rmse << 0, 0, 0, 0;
 
-		error = estimations[i] - ground_truth[i];
-		RMSE = RMSE + error.array()*error.array();
+	if (estimations.size() != ground_turth.size() || estimations.size()==0)
+	{
+		cout << " Invalid estimation or ground_truth data" << endl;
+		return rmse;
 	}
 
-	RMSE = RMSE.array() / (estimations.size());
-	RMSE = RMSE.array().sqrt();
+	for (unsigned int i = 0; i < estimations.size(); ++i)
+	{
+		VectorXd error = estimations[i] - ground_turth[i];
 
-	return RMSE;
+		error = error.array()*error.array();
+		rmse += error;
+	}
 
+	rmse = rmse / (estimations.size());
+	rmse = rmse.array().sqrt();
+
+	return rmse;
 }
 
-MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
-  /**
-  TODO:
-    * Calculate a Jacobian here.
-  */
-	MatrixXd Hj(3, 4);
-	//recover state parameters
-	float px = x_state(0);
-	float py = x_state(1);
-	float vx = x_state(2);
-	float vy = x_state(3);
+MatrixXd Tools::CalculateJacobian(const VectorXd &state_x) {
+
+	float px = state_x(0);
+	float py = state_x(1);
+	float vx = state_x(2);
+	float vy = state_x(3);
+
+	MatrixXd Jacobian(3, 4);
 
 	//pre-compute a set of terms to avoid repeated calculation
 	float c1 = px * px + py * py;
@@ -51,13 +50,13 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 	//check division by zero
 	if (fabs(c1) < 0.0001) {
 		cout << "CalculateJacobian () - Error - Division by Zero" << endl;
-		return Hj;
+		return Jacobian;
 	}
 
 	//compute the Jacobian matrix
-	Hj << (px / c2), (py / c2), 0, 0,
+	Jacobian << (px / c2), (py / c2), 0, 0,
 		-(py / c1), (px / c1), 0, 0,
 		py*(vx*py - vy * px) / c3, px*(px*vy - py * vx) / c3, px / c2, py / c2;
 
-	return Hj;
+	return Jacobian;
 }
